@@ -68,25 +68,27 @@ function App() {
   };
 
   const createCustomAttribute = async (refNo) => {
-    const url = "https://developer.api.autodesk.com/construction/assets/v1/projects/f514557e-3b26-434b-98fc-b743936e2aa0/custom-attributes";
-    const token = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlhrUFpfSmhoXzlTYzNZS01oRERBZFBWeFowOF9SUzI1NiIsInBpLmF0bSI6ImFzc2MifQ.eyJzY29wZSI6WyJkYXRhOnJlYWQiXSwiY2xpZW50X2lkIjoiYzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVAiLCJpc3MiOiJodHRwczovL2RldmVsb3Blci5hcGkuYXV0b2Rlc2suY29tIiwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20iLCJqdGkiOiJTbUp4d2JMVWVXT250YWNmalY2cFhWQ1lEUVUzWDZlRVlGNGk5ZGhUMlJ5RGw3UEdUaWlWcWc1Z3ZqS1JsaFYwIiwiZXhwIjoxNzM5MjU1MzU0fQ.GWfHlLv-trpfhrEKXPyRqAfpsaVfrcwUlCBMfLQqtbG8jyvfkdUxcq5cYssbG8BQiB_Oq7WZMV5DDZL6NWt7YqYTv2YTazVhTkT6Ro2ylVc0o1WLuhTSswAvurHO0DcLrTFLLCC0zGIJ6mobqoR2G4l3U8-N26bnMYpbSWkIEtuNsPYBo0Yh_6Au3L_GkPTwCkXBdgQRq_lDFLNYxRi1omQB5vB43C0h3copNEfMpFiQL6F9ghLqEdDXd0fwGkTYTYdX222jAUBAOQr4U7iUGkNOofN3-FRhT8RxQ1ch4b5f9wucvGbUBwalqMTnc8Ql1Qx8lQ3ZM6hWDKEOC3gDAA"
-    const customAttributeData = {
-      name: "Reference Number",
-      value: refNo,
-      type: "text",
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IlhrUFpfSmhoXzlTYzNZS01oRERBZFBWeFowOF9SUzI1NiIsInBpLmF0bSI6ImFzc2MifQ.eyJzY29wZSI6WyJkYXRhOnJlYWQiLCJkYXRhOndyaXRlIl0sImNsaWVudF9pZCI6ImM3SUpET2tXeW9VTXp2bUFpSEppMUI5SHV5cTNaMTFQIiwiaXNzIjoiaHR0cHM6Ly9kZXZlbG9wZXIuYXBpLmF1dG9kZXNrLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXV0b2Rlc2suY29tIiwianRpIjoiZkNaSnNtblRRSUxEeVdDVnJ1MEJYMG91WFdKaE9hejFWUXY0dlNDVTJld1BxcXY4WE04dUwzVE1xdVd1QWhkZSIsImV4cCI6MTczOTI3NjgxMH0.LVxwLDMv0lIkkyvMRF-8p7Yby3GUOs47RsSHDCDl3qADUCy9CFX29SfoGpLrSdpDHqv0Ioq6DAVZCmX6mCbuZ2lQB1nFxi1ze8rV69FTscEqBOvEDcO0CqtB_LRnXbjfTxuDT-wfc5L9al67Esx2XAVulz4kiqk08qQEv_2H6exx77Bzn0nwc3uFr2qPdXJhwlW7uod93vt_pBZtjmu7YVLa-uowO_GqRFMUNaNahQ-8Y5tknk4Y0fOHqbsICrS9cU-2Is7xhXvqqnvOc4vIFCCQn1NQttX8e8cg-rFNWE-1mR7MHvDNZLLRDs3faOxTUfKMZjQ7ULYznlC_Z0Cesw");
+    myHeaders.append("Content-Type", "application/json");
+    
+    const raw = JSON.stringify({
+      "name": "Reference no",
+      "type": "string",
+      "value": refNo
+    });
+    
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
     };
-
-    try {
-      const response = await axios.post(url, customAttributeData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("Custom attribute created:", response.data);
-    } catch (error) {
-      console.error("Error creating custom attribute:", error);
-    }
+    
+    fetch("https://developer.api.autodesk.com/bim360/docs/v1/projects/f514557e-3b26-434b-98fc-b743936e2aa0/folders/urn%3Aadsk.wipprod%3Afs.folder%3Aco.drl6ho8FRr2DsgjduOGoVw/custom-attribute-definitions", requestOptions)
+      .then((response) => response.text())
+      .then((result) => console.log(result))
+      .catch((error) => console.error(error));
   };
 
   return (
