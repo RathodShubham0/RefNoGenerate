@@ -19,7 +19,31 @@ function App() {
       setPdfFile(URL.createObjectURL(file));
     }
   };
-
+  const getAccessToken = async () => {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append("Authorization", "Basic YzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVA6M1Q4dlBRSmxNbEFLa2ZNMA==");
+  
+    const urlencoded = new URLSearchParams();
+    urlencoded.append("grant_type", "client_credentials");
+    urlencoded.append("scope", "data:read data:write");
+  
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: urlencoded,
+      redirect: "follow"
+    };
+  
+    try {
+      const response = await fetch("https://developer.api.autodesk.com/authentication/v2/token", requestOptions);
+      const result = await response.json();
+      return result.access_token;
+    } catch (error) {
+      console.error("Error fetching access token:", error);
+    }
+  };
   const extractTextFromPDF = async () => {
     if (!pdfFile) return;
 
@@ -58,9 +82,24 @@ function App() {
 
         const data = await response.json();
         setRefNo(data.refNo);
-
+        console.log(data.refNo);
         // Create a new custom attribute in Autodesk Construction Cloud
         await createCustomAttribute(data.refNo);
+
+         const projectId = '';
+        const versionId = 'urn:adsk.wipprod:fs.file:vf.pIV994alTz-rHQND52XyPg?version=1'
+
+ 
+        // Custom attributes to update
+        const customAttributes = [
+          {
+            id: 5716121, // Replace with your custom attribute ID
+            value: 'checked_updated',
+          
+          },
+        ];
+
+        updateCustomAttributes(projectId, versionId, customAttributes);
       });
     } catch (error) {
       console.error("Error extracting text:", error);
@@ -69,13 +108,14 @@ function App() {
 
   const createCustomAttribute = async (refNo) => {
     const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IlhrUFpfSmhoXzlTYzNZS01oRERBZFBWeFowOF9SUzI1NiIsInBpLmF0bSI6ImFzc2MifQ.eyJzY29wZSI6WyJkYXRhOnJlYWQiLCJkYXRhOndyaXRlIl0sImNsaWVudF9pZCI6ImM3SUpET2tXeW9VTXp2bUFpSEppMUI5SHV5cTNaMTFQIiwiaXNzIjoiaHR0cHM6Ly9kZXZlbG9wZXIuYXBpLmF1dG9kZXNrLmNvbSIsImF1ZCI6Imh0dHBzOi8vYXV0b2Rlc2suY29tIiwianRpIjoiZkNaSnNtblRRSUxEeVdDVnJ1MEJYMG91WFdKaE9hejFWUXY0dlNDVTJld1BxcXY4WE04dUwzVE1xdVd1QWhkZSIsImV4cCI6MTczOTI3NjgxMH0.LVxwLDMv0lIkkyvMRF-8p7Yby3GUOs47RsSHDCDl3qADUCy9CFX29SfoGpLrSdpDHqv0Ioq6DAVZCmX6mCbuZ2lQB1nFxi1ze8rV69FTscEqBOvEDcO0CqtB_LRnXbjfTxuDT-wfc5L9al67Esx2XAVulz4kiqk08qQEv_2H6exx77Bzn0nwc3uFr2qPdXJhwlW7uod93vt_pBZtjmu7YVLa-uowO_GqRFMUNaNahQ-8Y5tknk4Y0fOHqbsICrS9cU-2Is7xhXvqqnvOc4vIFCCQn1NQttX8e8cg-rFNWE-1mR7MHvDNZLLRDs3faOxTUfKMZjQ7ULYznlC_Z0Cesw");
+    let accessToken = await getAccessToken();
+    myHeaders.append("Authorization", `Bearer ${accessToken}`);
     myHeaders.append("Content-Type", "application/json");
     
     const raw = JSON.stringify({
       "name": "Reference no",
       "type": "string",
-      "value": refNo
+   
     });
     
     const requestOptions = {
@@ -90,6 +130,30 @@ function App() {
       .then((result) => console.log(result))
       .catch((error) => console.error(error));
   };
+
+   
+
+async function updateCustomAttributes(projectId, versionId, customAttributes) {
+  projectId = "f514557e-3b26-434b-98fc-b743936e2aa0"
+  let accessToken = await getAccessToken();
+  const url = `https://developer.api.autodesk.com/bim360/docs/v1/projects/${projectId}/versions/${encodeURIComponent(versionId)}/custom-attributes:batch-update`;
+  console.log(url)
+
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    const response = await axios.post(url, customAttributes, { headers });
+    console.log('Custom attributes updated successfully:', response.data);
+  } catch (error) {
+    console.error('Error updating custom attributes:', error.response ? error.response.data : error.message);
+  }
+}
+
+
+
 
   return (
     <div className="App">
