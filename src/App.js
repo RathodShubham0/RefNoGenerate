@@ -11,7 +11,7 @@ const App = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [extractedText, setExtractedText] = useState("");
   const [refNo, setRefNo] = useState("");
-
+  const [fileUploadData , setFileUploadData] = useState(null); 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -75,7 +75,7 @@ const App = () => {
         setExtractedText(text);
 
         // Call the Flask backend to extract the reference number
-        const response = await fetch('http://localhost:5000/extract-ref-no', {
+        const response = await fetch('https://b6d6-103-176-186-246.ngrok-free.app/extract-ref-no', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -132,8 +132,9 @@ const App = () => {
       }
     ];
 
-    const folderId = "urn:adsk.wipprod:fs.folder:co.drl6ho8FRr2DsgjduOGoVw";
-    const projectId = "f514557e-3b26-434b-98fc-b743936e2aa0";
+    const folderId =  fileUploadData[fileUploadData.length -1 ].payload.parentFolderUrn;    //"urn:adsk.wipprod:fs.folder:co.drl6ho8FRr2DsgjduOGoVw";
+    const projectId = fileUploadData[fileUploadData.length -1 ].payload.project;
+  
     const url = `https://developer.api.autodesk.com/bim360/docs/v1/projects/${projectId}/folders/${encodeURIComponent(folderId)}/custom-attribute-definitions`;
 
     for (const attribute of attributes) {
@@ -172,8 +173,9 @@ const App = () => {
       }
     ];
 
-    const versionId = 'urn:adsk.wipprod:fs.file:vf.9YFgpsqQQ5mxVFj6UVXI-g?version=1';
-    const projectId = "f514557e-3b26-434b-98fc-b743936e2aa0";
+    const versionId =  fileUploadData[fileUploadData.length -1 ].resourceUrn;
+    const projectId = fileUploadData[fileUploadData.length -1 ].payload.project;
+    console.log('versionId:', versionId); console.log('projectId:', projectId);
     const accessToken = await getAccessToken();
     const url = `https://developer.api.autodesk.com/bim360/docs/v1/projects/${projectId}/versions/${encodeURIComponent(versionId)}/custom-attributes:batch-update`;
 
@@ -189,9 +191,34 @@ const App = () => {
       console.error('Error updating custom attributes:', error.response ? error.response.data : error.message);
     }
   };
+   
+  // const startMoniter = async () => {
+  //   const response = await fetch('https://b6d6-103-176-186-246.ngrok-free.app/monitor', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     }
+ 
+  //   });
+
+  //   const data = await response.json();
+  //   console.log(data);
+  // };
+
+  const fetchWebhookData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/webhook-data');
+      const data = response.data;
+      console.log(data);
+      setFileUploadData(data);
+    } catch (error) {
+      console.error('Error fetching webhook data:', error);
+    }
+  };
 
   return (
     <div className="App">
+       <button onClick={fetchWebhookData}>get data from backend</button>
       <h1>PDF Data Extractor</h1>
       <input type="file" accept=".pdf" onChange={handleFileUpload} />
       <button onClick={extractTextFromPDF}>Extract Text</button>
