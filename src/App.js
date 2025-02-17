@@ -9,20 +9,19 @@ import axios from "axios";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const App = () => {
-  const [pdfFile, setPdfFile] = useState(null);
+ 
   const [extractedText, setExtractedText] = useState("");
   const [refNo, setRefNo] = useState("");
   const [fileUploadData, setFileUploadData] = useState(null);
   const [searchParams] = useSearchParams();
   const code = searchParams.get('code');
   const[threeLegged, setThreeLegged] = useState(null);
-  // useEffect(() => {
-  //   console.log("code:", code);
-  //   if (code) {
-  //     setThreeLegged( getThreeLeggedToken(code))
-  //   }
+
+
+  useEffect(() => {
+    setThreeLegged("eyJhbGciOiJSUzI1NiIsImtpZCI6IlhrUFpfSmhoXzlTYzNZS01oRERBZFBWeFowOF9SUzI1NiIsInBpLmF0bSI6ImFzc2MifQ.eyJzY29wZSI6WyJkYXRhOmNyZWF0ZSIsImRhdGE6cmVhZCIsImRhdGE6d3JpdGUiXSwiY2xpZW50X2lkIjoiYzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVAiLCJpc3MiOiJodHRwczovL2RldmVsb3Blci5hcGkuYXV0b2Rlc2suY29tIiwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20iLCJqdGkiOiJXMXVTcXlvUmRTYU9rU2RmUkhDckxlb0hwWkZJeWE3ejlmNVNsUUN6bXpHZGZpbXV1U2NUZ25NMEFBYjI5THdrIiwiZXhwIjoxNzM5Nzg2ODQxLCJ1c2VyaWQiOiI2TDkyUk0zVVFYM01IVlc2In0.TjY97yP_9su-yBykdRX1Z3i-vLacQ3UsjmfCpZ6tTEOcmdKYOEr2tSQp-CZtPqNBXjGJeWk7x9B_6_oSMHSIlA1Kf0hnkItmuVLP0NIYVr7qtgJNz3OPUsqe38xieK56iw22SxjGxLRXXtN1j4RakSR94hbGwEEcARaKnJCF7ZNgnJgHEVX95mtgvOGDCGyvMC34F3FyMC-5QQoy-I3ZiPaHan487GAAImWLo9sx0fN0lHZNW5eBFRuhQn_vB-9f-te7xRRlmzGKP9G5srdMlSUiF1-wxGqbDpiwTLclLhDbFCZNE11kJhvG7uiHbBGUHAdchEAoEvUijNtTzA_E8A");
     
-  // }, []);
+  }, []);
   
   // const getThreeLeggedToken = async (authCode) => {
   //   const myHeaders = new Headers();
@@ -51,12 +50,7 @@ const App = () => {
   //   }
   // };
  
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setPdfFile(URL.createObjectURL(file));
-    }
-  };
+  
 
   const getAccessToken = async () => {
     const headers = new Headers({
@@ -89,7 +83,7 @@ const App = () => {
 
   const exportFile = async () => {
     const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IlhrUFpfSmhoXzlTYzNZS01oRERBZFBWeFowOF9SUzI1NiIsInBpLmF0bSI6ImFzc2MifQ.eyJzY29wZSI6WyJkYXRhOmNyZWF0ZSIsImRhdGE6cmVhZCIsImRhdGE6d3JpdGUiXSwiY2xpZW50X2lkIjoiYzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVAiLCJpc3MiOiJodHRwczovL2RldmVsb3Blci5hcGkuYXV0b2Rlc2suY29tIiwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20iLCJqdGkiOiJraDEzZlV2ZlNuNVZ1b2dOZWhvdnZXQkpIa1lxMkRxeTVZTGpaRmNBM3NEbk42V3hMUWxGdGQ4MGtlcGNvUEJHIiwiZXhwIjoxNzM5NTQxNzk5LCJ1c2VyaWQiOiI2TDkyUk0zVVFYM01IVlc2In0.JgOx5AeMwUT33r6fbUV_gOKn8QzPV0XbZWiip8PytE20gr2NFGtPSY32fC7AWZj9-BDh0OVNRCxhBD8PtjUmpNEzr3LeAd5QmqGNNhyOHJnpErAr7l1Fo26wBMLkfK12D-Z9imBsxqci9PXhiewALNRP4WUrtyhAqwfBl5FmSu34vUKFGKkwYIn6LsQSFM0WaBcq1fG2WTD_8S3L92BM_t7uBHl0-872hzmV-wttdHakKiECs_y0u8mWNxSjgDI4Br1GK0aucTt6mvaYvjVJDkEw3C7HRJKlZggjh1Iv400w-ywkOusKICYDp1FXA5Yxfd-Y7yeKD2i9KpQZyfrBrg");
+    myHeaders.append("Authorization", `Bearer ${threeLegged}`);
     myHeaders.append("Content-Type", "application/json");
 
     const raw = JSON.stringify({
@@ -134,7 +128,7 @@ const App = () => {
 
     console.log("threeLegged:", threeLegged);
     const myHeaders = new Headers();
-    myHeaders.append("Authorization", "Bearer  eyJhbGciOiJSUzI1NiIsImtpZCI6IlhrUFpfSmhoXzlTYzNZS01oRERBZFBWeFowOF9SUzI1NiIsInBpLmF0bSI6ImFzc2MifQ.eyJzY29wZSI6WyJkYXRhOmNyZWF0ZSIsImRhdGE6cmVhZCIsImRhdGE6d3JpdGUiXSwiY2xpZW50X2lkIjoiYzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVAiLCJpc3MiOiJodHRwczovL2RldmVsb3Blci5hcGkuYXV0b2Rlc2suY29tIiwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20iLCJqdGkiOiJraDEzZlV2ZlNuNVZ1b2dOZWhvdnZXQkpIa1lxMkRxeTVZTGpaRmNBM3NEbk42V3hMUWxGdGQ4MGtlcGNvUEJHIiwiZXhwIjoxNzM5NTQxNzk5LCJ1c2VyaWQiOiI2TDkyUk0zVVFYM01IVlc2In0.JgOx5AeMwUT33r6fbUV_gOKn8QzPV0XbZWiip8PytE20gr2NFGtPSY32fC7AWZj9-BDh0OVNRCxhBD8PtjUmpNEzr3LeAd5QmqGNNhyOHJnpErAr7l1Fo26wBMLkfK12D-Z9imBsxqci9PXhiewALNRP4WUrtyhAqwfBl5FmSu34vUKFGKkwYIn6LsQSFM0WaBcq1fG2WTD_8S3L92BM_t7uBHl0-872hzmV-wttdHakKiECs_y0u8mWNxSjgDI4Br1GK0aucTt6mvaYvjVJDkEw3C7HRJKlZggjh1Iv400w-ywkOusKICYDp1FXA5Yxfd-Y7yeKD2i9KpQZyfrBrg");
+    myHeaders.append("Authorization",  `Bearer ${threeLegged}`);
 
     const requestOptions = {
       method: "GET",
@@ -196,7 +190,7 @@ const App = () => {
         setExtractedText(text);
         // Call the Flask backend to extract the reference number
         const response = await fetch(
-          "https://b6d6-103-176-186-246.ngrok-free.app/extract-ref-no",
+          "http://localhost:5000/extract-ref-no",
           {
             method: "POST",
             headers: {
@@ -328,6 +322,7 @@ const App = () => {
       const data = response.data;
       console.log(data);
       setFileUploadData(data);
+   
     } catch (error) {
       console.error("Error fetching webhook data:", error);
     }
@@ -337,7 +332,7 @@ const App = () => {
     <div className="App">
       <button onClick={fetchWebhookData}>get data from backend</button>
       <h1>PDF Data Extractor</h1>
-      <input type="file" accept=".pdf" onChange={handleFileUpload} />
+  
       <button onClick={extractTextFromPDF}>Extract Text</button>
       {extractedText && (
         <div>
