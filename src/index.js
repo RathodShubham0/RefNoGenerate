@@ -1,9 +1,4 @@
-/**
- *
- * project name     : pdf summarizer
- * project author   : mindula dilthushan
- *
- */
+ 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
