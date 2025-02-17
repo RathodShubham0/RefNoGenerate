@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify , send_file
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import re
 import logging
@@ -104,6 +104,7 @@ def download_pdf():
         f.write(response.content)
     return jsonify({'message': 'File downloaded successfully', 'file_path': file_path})
 
+
 @app.route('/pdf', methods=['GET'])
 def serve_pdf():
     file_path = os.path.join(os.getcwd(), 'public', 'downloaded.pdf')
@@ -111,6 +112,6 @@ def serve_pdf():
         return send_file(file_path, as_attachment=True, mimetype='application/pdf')
     except Exception as e:
         return str(e)
-
+    
 if __name__ == '__main__':
     app.run(debug=True)
