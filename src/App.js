@@ -1,77 +1,74 @@
-import React, { useState, useEffect} from "react";
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import Tesseract from "tesseract.js";
 import { pdfjs } from "react-pdf";
 import axios from "axios";
-import { useLocation } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
+import { useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+ 
 import "./App.css";
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from "@mui/material/Tooltip";
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-
 const App = () => {
- 
   const [extractedText, setExtractedText] = useState("");
   const [refNo, setRefNo] = useState("");
   const [fileUploadData, setFileUploadData] = useState(null);
   const [searchParams] = useSearchParams();
-  const code = searchParams.get('code');
+  const code = searchParams.get("code");
   const [webhookData, setWebhookData] = useState(null);
- 
 
- 
-    const [threeLegged, setThreeLegged] = useState(() => sessionStorage.getItem('autodesk_token'));
-    const location = useLocation();
-  
-    useEffect(() => {
-      if (sessionStorage.getItem('autodesk_token')) return;
-  
-      const params = new URLSearchParams(location.search);
-      const authCode = params.get('code');
-  
-      if (!authCode) return;
-  
-      const fetchToken = async () => {
-        try {
-          const response = await fetch('https://developer.api.autodesk.com/authentication/v2/token', {
-            method: 'POST',
+  const [threeLegged, setThreeLegged] = useState(() =>
+    sessionStorage.getItem("autodesk_token")
+  );
+  const location = useLocation();
+
+  useEffect(() => {
+    if (sessionStorage.getItem("autodesk_token")) return;
+
+    const params = new URLSearchParams(location.search);
+    const authCode = params.get("code");
+
+    if (!authCode) return;
+
+    const fetchToken = async () => {
+      try {
+        const response = await fetch(
+          "https://developer.api.autodesk.com/authentication/v2/token",
+          {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Authorization': 'Basic YzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVA6M1Q4dlBRSmxNbEFLa2ZNMA=='
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization:
+                "Basic YzdJSkRPa1d5b1VNenZtQWlISmkxQjlIdXlxM1oxMVA6M1Q4dlBRSmxNbEFLa2ZNMA==",
             },
             body: new URLSearchParams({
-              grant_type: 'authorization_code',
+              grant_type: "authorization_code",
               code: authCode,
-              redirect_uri: 'http://localhost:3000/'
-            })
-          });
-  
-          const data = await response.json();
-          if (data.access_token) {
-            sessionStorage.setItem('autodesk_token', data.access_token);
-            setThreeLegged(data.access_token);
+              redirect_uri: "http://localhost:3000/",
+            }),
           }
-        } catch (error) {
-          console.error('Error fetching token:', error);
+        );
+
+        const data = await response.json();
+        if (data.access_token) {
+          sessionStorage.setItem("autodesk_token", data.access_token);
+          setThreeLegged(data.access_token);
         }
-      };
-  
-      fetchToken();
-    }, [location, threeLegged]);
-  
- 
-  
+      } catch (error) {
+        console.error("Error fetching token:", error);
+      }
+    };
+
+    fetchToken();
+  }, [location, threeLegged]);
 
   const getAccessToken = async () => {
     const headers = new Headers({
@@ -108,36 +105,37 @@ const App = () => {
     myHeaders.append("Content-Type", "application/json");
 
     const raw = JSON.stringify({
-      "options": {
-        "outputFileName": "console.pdf",
-        "standardMarkups": {
-          "includePublishedMarkups": true,
-          "includeUnpublishedMarkups": true,
-          "includeMarkupLinks": true
+      options: {
+        outputFileName: "console.pdf",
+        standardMarkups: {
+          includePublishedMarkups: true,
+          includeUnpublishedMarkups: true,
+          includeMarkupLinks: true,
         },
-        "issueMarkups": {
-          "includePublishedMarkups": true,
-          "includeUnpublishedMarkups": true
+        issueMarkups: {
+          includePublishedMarkups: true,
+          includeUnpublishedMarkups: true,
         },
-        "photoMarkups": {
-          "includePublishedMarkups": true,
-          "includeUnpublishedMarkups": true
-        }
+        photoMarkups: {
+          includePublishedMarkups: true,
+          includeUnpublishedMarkups: true,
+        },
       },
-      "fileVersions": [
-        fileUploadData[fileUploadData.length - 1].resourceUrn
-      ]
+      fileVersions: [fileUploadData[fileUploadData.length - 1].resourceUrn],
     });
 
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
       body: raw,
-      redirect: "follow"
+      redirect: "follow",
     };
 
     try {
-      const response = await fetch("https://developer.api.autodesk.com/construction/files/v1/projects/f514557e-3b26-434b-98fc-b743936e2aa0/exports", requestOptions);
+      const response = await fetch(
+        "https://developer.api.autodesk.com/construction/files/v1/projects/f514557e-3b26-434b-98fc-b743936e2aa0/exports",
+        requestOptions
+      );
       const result = await response.json();
       return await getExportedFile(result.id);
     } catch (error) {
@@ -149,38 +147,41 @@ const App = () => {
     const myHeaders = {
       Authorization: `Bearer ${threeLegged}`,
     };
-  
+
     const requestOptions = {
       method: "GET",
       headers: myHeaders,
     };
-  
+
     const fetchFile = async () => {
       try {
         const response = await axios.get(
           `https://developer.api.autodesk.com/construction/files/v1/projects/f514557e-3b26-434b-98fc-b743936e2aa0/exports/${exportId}`,
           requestOptions
         );
-  
+
         const result = response.data;
-  
+
         if (result.result.output.signedUrl) {
           return result.result.output.signedUrl;
         } else {
           throw new Error("Signed URL not ready yet");
         }
       } catch (error) {
-        console.error("Error getting exported file, retrying in 2 seconds...", error);
+        console.error(
+          "Error getting exported file, retrying in 2 seconds...",
+          error
+        );
         return null;
       }
     };
-  
+
     let url = await fetchFile();
     if (!url) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       url = await fetchFile();
     }
-  
+
     return url;
   };
 
@@ -206,7 +207,7 @@ const App = () => {
       );
       console.log(response.data);
 
-      const responseData = await fetch('http://localhost:5000/pdf');
+      const responseData = await fetch("http://localhost:5000/pdf");
       const blob = await responseData.blob();
       // Convert blob to ArrayBuffer
       const arrayBuffer = await blob.arrayBuffer();
@@ -230,22 +231,21 @@ const App = () => {
       }).then(async ({ data: { text } }) => {
         setExtractedText(text);
         // Call the Flask backend to extract the reference number
-        const response = await fetch(
-          "http://localhost:5000/extract-ref-no",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ text }),
-          }
-        );
+        const response = await fetch("http://localhost:5000/extract-ref-no", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text }),
+        });
         const data = await response.json();
         setRefNo(data.refNo);
-        
+
         // Create a new custom attribute in Autodesk Construction Cloud
         await createCustomAttribute(data.parsedData);
-        toast.success("PDF extraction completed successfully and Attributes are added to acc!");
+        toast.success(
+          "PDF extraction completed successfully and Attributes are added to acc!"
+        );
       });
     } catch (error) {
       console.error("Error extracting text:", error);
@@ -255,7 +255,7 @@ const App = () => {
   const createCustomAttribute = async (attributeData) => {
     const accessToken = await getAccessToken();
     const headers = new Headers({
-      "Authorization": `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     });
 
@@ -365,7 +365,7 @@ const App = () => {
       const data = response.data;
       console.log(data);
       setFileUploadData(data);
-      const data1 = data[data.length - 1]
+      const data1 = data[data.length - 1];
       setWebhookData({
         project: data1.payload.project,
         fileName: data1.payload.name,
@@ -373,7 +373,6 @@ const App = () => {
         createdTime: data1.payload.context.lineage.createTime,
       });
       console.log("Webhook data:", webhookData);
-   
     } catch (error) {
       console.error("Error fetching webhook data:", error);
     }
@@ -381,47 +380,69 @@ const App = () => {
 
   return (
     <div className="App">
-       <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" style={{backgroundColor: "black"}}>
-        <Toolbar>
-          {/* <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton> */}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "left", fontSize: "14px" }}>
-          Reference Number Generation
-          </Typography>
-          <Tooltip title="Fetch data from Autodesk ACC via Webhook" arrow>
-        <button onClick={fetchWebhookData} style={{backgroundColor: "#11546a", color:"white"}}>Fetch Data from ACC</button>
-      </Tooltip>
-      <Tooltip title="Extract Reference Number From Download file" arrow>
-      <button onClick={extractTextFromPDF} style={{backgroundColor: "#11546a", color:"white"}}>Extract reference Number</button></Tooltip>
-          {/* <Button color="inherit">Login</Button> */}
-        </Toolbar>
-      </AppBar>
-    </Box>
-      
-      
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static" style={{ backgroundColor: "black" }}>
+          <Toolbar>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, textAlign: "left", fontSize: "14px" }}
+            >
+              Reference Number Generation
+            </Typography>
+            <Tooltip title="Fetch data from Autodesk ACC via Webhook" arrow>
+              <button
+                onClick={fetchWebhookData}
+                style={{ backgroundColor: "#11546a", color: "white" }}
+              >
+                Fetch Data from ACC
+              </button>
+            </Tooltip>
+            <Tooltip title="Extract Reference Number From Download file" arrow>
+              <button
+                onClick={extractTextFromPDF}
+                style={{ backgroundColor: "#11546a", color: "white" }}
+              >
+                Extract reference Number
+              </button>
+            </Tooltip>
+          </Toolbar>
+        </AppBar>
+      </Box>
 
- 
       {refNo && (
-        <div className="webhook-data-box" style={{marginTop: "90px"}}>
-          <h5 style={{color:"#11546a"}}>Reference Number Extracted from PDF</h5>
-          <h6 style={{fontSize: "14px"}}><p>{refNo}</p></h6>
+        <div className="webhook-data-box" style={{ marginTop: "90px" }}>
+          <h5 style={{ color: "#11546a" }}>
+            Reference Number Extracted from PDF
+          </h5>
+          <h6 style={{ fontSize: "14px" }}>
+            <p>{refNo}</p>
+          </h6>
         </div>
       )}
       {webhookData && (
         <div className="webhook-data-box">
-          <h5 style={{color:"#11546a"}}>Webhook Data</h5>
-          <h6 style={{fontSize: "14px"}}><p><strong>Project:</strong> {webhookData.project}</p></h6>
-          <h6 style={{fontSize: "14px"}}><p><strong>File Name:</strong> {webhookData.fileName}</p></h6>
-          <h6 style={{fontSize: "14px"}}><p><strong>Created By:</strong> {webhookData.createdBy}</p></h6>
-          <h6 style={{fontSize: "14px"}}><p><strong>Created At:</strong> {webhookData.createdTime}</p></h6>
+          <h5 style={{ color: "#11546a" }}>Webhook Data</h5>
+          <h6 style={{ fontSize: "14px" }}>
+            <p>
+              <strong>Project:</strong> {webhookData.project}
+            </p>
+          </h6>
+          <h6 style={{ fontSize: "14px" }}>
+            <p>
+              <strong>File Name:</strong> {webhookData.fileName}
+            </p>
+          </h6>
+          <h6 style={{ fontSize: "14px" }}>
+            <p>
+              <strong>Created By:</strong> {webhookData.createdBy}
+            </p>
+          </h6>
+          <h6 style={{ fontSize: "14px" }}>
+            <p>
+              <strong>Created At:</strong> {webhookData.createdTime}
+            </p>
+          </h6>
         </div>
       )}
       <ToastContainer position="bottom-right" />
